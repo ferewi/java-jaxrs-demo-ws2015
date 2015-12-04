@@ -8,7 +8,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,10 +29,11 @@ public class ProjectResource {
     }
 
     @POST
-    @Consumes(MediaType.TEXT_PLAIN)
-    public Response newProject1(@Context UriInfo info, String name) {
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response newProject(@Context UriInfo info, Project project) {
         int id = getId();
-        Project project = new Project(id, getTimestamp(), name);
+        project.setId(id);
+        project.setTimestamp(getTimestamp());
         projects.put(id, project);
         URI location = info.getAbsolutePathBuilder().path(String.valueOf(id)).build();
 
@@ -39,7 +42,7 @@ public class ProjectResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response newProject2(@Context UriInfo info, @FormParam("text") String name) {
+    public Response newProject(@Context UriInfo info, @FormParam("name") String name) {
         int id = getId();
         Project project = new Project(id, getTimestamp(), name);
         projects.put(id, project);
@@ -50,51 +53,40 @@ public class ProjectResource {
 
     @GET
     @Path("{id}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response getProject(@PathParam("id") int id) {
         Project project = projects.get(id);
         if (project == null) {
             return Response.noContent().status(Response.Status.NOT_FOUND).build();
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("<?xml version=\"1.0\"?>");
-        sb.append("<project id=\""+ project.getId() +"\">");
-        sb.append("<timestamp>"+ project.getTimestamp() +"</timestamp>");
-        sb.append("<name>"+ project.getName() +"</name>");
-        sb.append("</project>");
-
-        return Response.ok(sb.toString()).build();
+        return Response.ok(project).build();
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_XML)
-    public Response getAllProjects() {
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Projects getAllProjects() {
         Object[] values = projects.values().toArray();
         Arrays.sort(values);
-        StringBuilder sb = new StringBuilder();
-        sb.append("<?xml version=\"1.0\"?>");
-        sb.append("<projects>");
-        for (Object object : values) {
-            Project project = (Project) object;
-            sb.append("<project id=\""+ project.getId() +"\">");
-            sb.append("<timestamp>"+ project.getTimestamp() +"</timestamp>");
-            sb.append("<name>"+ project.getName() +"</name>");
-            sb.append("</project>");
-        }
-        sb.append("</projects>");
+        List<Project> list = new ArrayList<Project>();
 
-        return Response.ok(sb.toString()).build();
+        for (Object object : values) {
+            list.add((Project) object);
+        }
+        Projects collection = new Projects(list);
+
+        return collection;
     }
 
     @PUT
     @Path("{id}")
-    public Response updateProject(@PathParam("id") int id, String name) {
-        Project project = projects.get(id);
-        if (project == null) {
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response updateProject(@PathParam("id") int id, Project project) {
+        if (projects.get(id) == null) {
             return Response.noContent().status(Response.Status.NOT_FOUND).build();
         } else {
+            project.setId(id);
             project.setTimestamp(getTimestamp());
-            project.setName(name);
             projects.put(id, project);
 
             return Response.noContent().status(Response.Status.NO_CONTENT).build();
