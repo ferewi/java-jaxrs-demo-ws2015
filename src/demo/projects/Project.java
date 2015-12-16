@@ -1,6 +1,11 @@
 package demo.projects;
 
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
+@XmlRootElement(name = "project")
+@XmlType(propOrder = { "id", "timestamp", "name" })
 public class Project implements Comparable<Project> {
 
     private int id;
@@ -21,6 +26,7 @@ public class Project implements Comparable<Project> {
         this.name = name;
     }
 
+    @XmlAttribute
     public int getId() {
         return id;
     }

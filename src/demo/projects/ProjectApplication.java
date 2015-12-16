@@ -1,5 +1,7 @@
 package demo.projects;
 
+import org.glassfish.jersey.jackson.JacksonFeature;
+
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +13,7 @@ public class ProjectApplication extends Application {
 
     public ProjectApplication() {
         singletons.add(new ProjectResource());
+        singletons.add(new JacksonFeature());
     }
 
     @Override
