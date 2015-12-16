@@ -28,7 +28,7 @@ public class ProjectResource {
 
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    public Response newProject1(@Context UriInfo info, String name) {
+    public Response newProject(@Context UriInfo info, String name) {
         int id = getId();
         Project project = new Project(id, getTimestamp(), name);
         projects.put(id, project);
@@ -39,7 +39,7 @@ public class ProjectResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response newProject2(@Context UriInfo info, @FormParam("text") String name) {
+    public Response newProjectFromForm(@Context UriInfo info, @FormParam("name") String name) {
         int id = getId();
         Project project = new Project(id, getTimestamp(), name);
         projects.put(id, project);
